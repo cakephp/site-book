@@ -51,7 +51,7 @@ server {
 
     # Match / to the  current version of the docs published
     location ~ ^/$ {
-        rewrite ^ /4/en/ permanent;
+        rewrite ^ /5/en/ permanent;
     }
 
     #
