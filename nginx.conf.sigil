@@ -62,9 +62,9 @@ server {
         rewrite ^ /5/en/index.html redirect;
     }
 
-    # Handle /4.0/en and /4/en
-    location ~ ^/4(\.0)?/([a-z][a-z])/?$ {
-        rewrite ^/4(?:\.0)?/([^/]+) /4/$1/index.html redirect;
+    # Handle /5.0/en and /5/en
+    location ~ ^/5(\.0)?/([a-z][a-z])/?$ {
+        rewrite ^/5(?:\.0)?/([^/]+) /5/$1/index.html redirect;
     }
 
     # Handle /4.next
