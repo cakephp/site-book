@@ -138,10 +138,10 @@ server {
     location ~ ^/authentication/?$ {
         rewrite ^ /authentication/2/en/index.html redirect;
     }
-    location ~ ^/authentication/(1|2)/?$ {
+    location ~ ^/authentication/(1|2|3)/?$ {
         rewrite ^/authentication/([^/]+) /authentication/$1/en/index.html redirect;
     }
-    location ~ ^/authentication/(1|2)/([a-z][a-z])/?$ {
+    location ~ ^/authentication/(1|2|3)/([a-z][a-z])/?$ {
         rewrite ^/authentication/([^/]+)/([^/]+) /authentication/$1/$2/index.html redirect;
     }
     location ~ ^/authentication/1/?(.*)$ {
@@ -150,6 +150,10 @@ server {
     }
     location ~ ^/authentication/2/?(.*)$ {
         proxy_set_header Host "authentication-docs-2.cakephp.org";
+        proxy_pass http://localhost:80/$1;
+    }
+    location ~ ^/authentication/3/?(.*)$ {
+        proxy_set_header Host "authentication-docs-3.cakephp.org";
         proxy_pass http://localhost:80/$1;
     }
 
@@ -162,10 +166,10 @@ server {
     location ~ ^/authorization/?$ {
         rewrite ^ /authorization/2/en/index.html redirect;
     }
-    location ~ ^/authorization/(1|2)/?$ {
+    location ~ ^/authorization/(1|2|3)/?$ {
         rewrite ^/authorization/([^/]+) /authorization/$1/en/index.html redirect;
     }
-    location ~ ^/authorization/(1|2)/([a-z][a-z])/?$ {
+    location ~ ^/authorization/(1|2|3)/([a-z][a-z])/?$ {
         rewrite ^/authorization/([^/]+)/([^/]+) /authorization/$1/$2/index.html redirect;
     }
     location ~ ^/authorization/1/?(.*)$ {
@@ -174,6 +178,10 @@ server {
     }
     location ~ ^/authorization/2/?(.*)$ {
         proxy_set_header Host "authorization-docs-2.cakephp.org";
+        proxy_pass http://localhost:80/$1;
+    }
+    location ~ ^/authorization/3/?(.*)$ {
+        proxy_set_header Host "authorization-docs-3.cakephp.org";
         proxy_pass http://localhost:80/$1;
     }
 
@@ -186,10 +194,10 @@ server {
     location ~ ^/bake/?$ {
         rewrite ^ /bake/2/en/index.html redirect;
     }
-    location ~ ^/bake/[12]/?$ {
+    location ~ ^/bake/[123]/?$ {
         rewrite ^/bake/([^/]+) /bake/$1/en/index.html redirect;
     }
-    location ~ ^/bake/[12]/([a-z][a-z])/?$ {
+    location ~ ^/bake/[123]/([a-z][a-z])/?$ {
         rewrite ^/bake/([^/]+)/([^/]+) /bake/$1/$2/index.html redirect;
     }
     location ~ ^/bake/1/(.*)$ {
@@ -198,6 +206,10 @@ server {
     }
     location ~ ^/bake/2/(.*)$ {
         proxy_set_header Host "bake-docs-2.cakephp.org";
+        proxy_pass http://localhost:80/$1;
+    }
+    location ~ ^/bake/3/(.*)$ {
+        proxy_set_header Host "bake-docs-3.cakephp.org";
         proxy_pass http://localhost:80/$1;
     }
 
@@ -210,10 +222,10 @@ server {
     location ~ ^/chronos/?$ {
         rewrite ^ /chronos/2/en/index.html redirect;
     }
-    location ~ ^/chronos/[12]/?$ {
+    location ~ ^/chronos/[123]/?$ {
         rewrite ^/chronos/([^/]+) /chronos/$1/en/index.html redirect;
     }
-    location ~ ^/chronos/[12]/([a-z][a-z])/?$ {
+    location ~ ^/chronos/[123]/([a-z][a-z])/?$ {
         rewrite ^/chronos/([^/]+)/([^/]+) /chronos/$1/$2/index.html redirect;
     }
     location ~ ^/chronos/1/(.*)$ {
@@ -222,6 +234,10 @@ server {
     }
     location ~ ^/chronos/2/(.*)$ {
         proxy_set_header Host "chronos-docs-2.cakephp.org";
+        proxy_pass http://localhost:80/$1;
+    }
+    location ~ ^/chronos/3/(.*)$ {
+        proxy_set_header Host "chronos-docs-3.cakephp.org";
         proxy_pass http://localhost:80/$1;
     }
 
@@ -234,10 +250,10 @@ server {
     location ~ ^/debugkit/?$ {
         rewrite ^ /debugkit/4/en/index.html redirect;
     }
-    location ~ ^/debugkit/[34]/?$ {
+    location ~ ^/debugkit/[345]/?$ {
         rewrite ^/debugkit/([^/]+) /debugkit/$1/en/index.html redirect;
     }
-    location ~ ^/debugkit/[34]/([a-z][a-z])/?$ {
+    location ~ ^/debugkit/[345]/([a-z][a-z])/?$ {
         rewrite ^/debugkit/([^/]+)/([^/]+) /debugkit/$1/$2/index.html redirect;
     }
     location ~ ^/debugkit/3/?(.*)$ {
@@ -246,6 +262,10 @@ server {
     }
     location ~ ^/debugkit/4/?(.*)$ {
         proxy_set_header Host "debugkit-docs-4.cakephp.org";
+        proxy_pass http://localhost:80/$1;
+    }
+    location ~ ^/debugkit/5/?(.*)$ {
+        proxy_set_header Host "debugkit-docs-5.cakephp.org";
         proxy_pass http://localhost:80/$1;
     }
 
@@ -257,10 +277,10 @@ server {
     location ~ ^/elasticsearch/?$ {
         rewrite ^ /elasticsearch/3/en/index.html redirect;
     }
-    location ~ ^/elasticsearch/[23]/?$ {
+    location ~ ^/elasticsearch/[234]/?$ {
         rewrite ^/elasticsearch/([^/]+)/?$ /elasticsearch/$1/en/index.html redirect;
     }
-    location ~ ^/elasticsearch/[23]/([a-z][a-z])/?$ {
+    location ~ ^/elasticsearch/[234]/([a-z][a-z])/?$ {
         rewrite ^/elasticsearch/([^/]+)/([^/]+) /elasticsearch/$1/$2/index.html redirect;
     }
     location ~ ^/elasticsearch/2/?(.*)$ {
@@ -269,6 +289,10 @@ server {
     }
     location ~ ^/elasticsearch/3/?(.*)$ {
         proxy_set_header Host "elasticsearch-docs-3.cakephp.org";
+        proxy_pass http://localhost:80/$1;
+    }
+    location ~ ^/elasticsearch/4/?(.*)$ {
+        proxy_set_header Host "elasticsearch-docs-4.cakephp.org";
         proxy_pass http://localhost:80/$1;
     }
 
@@ -280,11 +304,11 @@ server {
     location ~ ^/migrations/?$ {
         rewrite ^ /migrations/2/en/index.html redirect;
     }
-    location ~ ^/migrations/[23]/?$ {
-        rewrite ^/migrations/([23])/?$ /migrations/$1/en/index.html redirect;
+    location ~ ^/migrations/[234]/?$ {
+        rewrite ^/migrations/([234])/?$ /migrations/$1/en/index.html redirect;
     }
-    location ~ ^/migrations/([23])/([a-z][a-z])/?$ {
-        rewrite ^/migrations/([23])/([^/]+) /migrations/$1/$2/index.html redirect;
+    location ~ ^/migrations/([234])/([a-z][a-z])/?$ {
+        rewrite ^/migrations/([234])/([^/]+) /migrations/$1/$2/index.html redirect;
     }
     location ~ ^/migrations/2/?(.*)$ {
         proxy_set_header Host "migrations-docs.cakephp.org";
@@ -292,6 +316,10 @@ server {
     }
     location ~ ^/migrations/3/?(.*)$ {
         proxy_set_header Host "migrations-docs-3.cakephp.org";
+        proxy_pass http://localhost:80/$1;
+    }
+    location ~ ^/migrations/4/?(.*)$ {
+        proxy_set_header Host "migrations-docs-4.cakephp.org";
         proxy_pass http://localhost:80/$1;
     }
 
@@ -322,6 +350,10 @@ server {
     }
     location ~ ^/queue/1/?(.*)$ {
         proxy_set_header Host "queue-docs-1.cakephp.org";
+        proxy_pass http://localhost:80/$1;
+    }
+    location ~ ^/queue/2/?(.*)$ {
+        proxy_set_header Host "queue-docs-2.cakephp.org";
         proxy_pass http://localhost:80/$1;
     }
 
