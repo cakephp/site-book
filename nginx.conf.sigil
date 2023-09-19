@@ -343,7 +343,7 @@ server {
         rewrite ^ /queue/1/en/index.html redirect;
     }
     location ~ ^/queue/[12]/?$ {
-        rewrite ^/queue/([12])/en/index.html /queue/$1/en/index.html redirect;
+        rewrite ^/queue/([12])/?$ /queue/$1/en/index.html redirect;
     }
     location ~ ^/queue/[12]/([a-z][a-z])/?$ {
         rewrite ^/queue/([12])/([^/]+) /queue/$1/$2/index.html redirect;
