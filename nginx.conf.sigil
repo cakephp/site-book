@@ -342,11 +342,11 @@ server {
     location ~ ^/queue/?$ {
         rewrite ^ /queue/1/en/index.html redirect;
     }
-    location ~ ^/queue/1/?$ {
-        rewrite ^ /queue/1/en/index.html redirect;
+    location ~ ^/queue/[12]/?$ {
+        rewrite ^/queue/([12])/en/index.html /queue/$1/en/index.html redirect;
     }
-    location ~ ^/queue/1/([a-z][a-z])/?$ {
-        rewrite ^/queue/1/([^/]+) /queue/1/$1/index.html redirect;
+    location ~ ^/queue/[12]/([a-z][a-z])/?$ {
+        rewrite ^/queue/([12])/([^/]+) /queue/$1/$2/index.html redirect;
     }
     location ~ ^/queue/1/?(.*)$ {
         proxy_set_header Host "queue-docs-1.cakephp.org";
