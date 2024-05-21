@@ -69,7 +69,7 @@ server {
 
     # Handle /5.next
     location ~ ^/5\.next/?$ {
-        rewrite ^/5\.next/([^/]+) /5.next/$1/index.html redirect;
+        rewrite ^ /5.next/en/index.html redirect;
     }
     # Handle /5.next/en
     location ~ ^/5\.next/([a-z][a-z])/?$ {
