@@ -67,6 +67,15 @@ server {
         rewrite ^/5(?:\.0)?/([^/]+) /5/$1/index.html redirect;
     }
 
+    # Handle /5.next
+    location ~ ^/5\.next/?$ {
+        rewrite ^/5\.next/([^/]+) /5.next/$1/index.html redirect;
+    }
+    # Handle /5.next/en
+    location ~ ^/5\.next/([a-z][a-z])/?$ {
+        rewrite ^/5\.next/([^/]+) /5.next/$1/index.html redirect;
+    }
+
     # Handle /4.next
     location ~ ^/4\.next/?$ {
         rewrite ^/4\.next/([^/]+) /4.next/$1/index.html redirect;
@@ -383,6 +392,11 @@ server {
     }
 
     # Proxy pass to version specific containers.
+    location ~ ^/5\.next/(.*) {
+        proxy_set_header Host "book-5next.cakephp.org";
+        proxy_pass http://localhost:80/$1;
+    }
+
     location ~ ^/5/(.*) {
         proxy_set_header Host "book-5.cakephp.org";
         proxy_pass http://localhost:80/$1;
