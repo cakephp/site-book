@@ -145,7 +145,7 @@ server {
         rewrite ^/authentication/2\.[0x]/?(.*) /authentication/2/$1 redirect;
     }
     location ~ ^/authentication/?$ {
-        rewrite ^ /authentication/2/en/index.html redirect;
+        rewrite ^ /authentication/3/en/index.html redirect;
     }
     location ~ ^/authentication/(1|2|3)/?$ {
         rewrite ^/authentication/([^/]+) /authentication/$1/en/index.html redirect;
@@ -173,7 +173,7 @@ server {
         rewrite ^/authorization/2\.[x0]/?(.*) /authorization/2/$1 redirect;
     }
     location ~ ^/authorization/?$ {
-        rewrite ^ /authorization/2/en/index.html redirect;
+        rewrite ^ /authorization/3/en/index.html redirect;
     }
     location ~ ^/authorization/(1|2|3)/?$ {
         rewrite ^/authorization/([^/]+) /authorization/$1/en/index.html redirect;
@@ -201,7 +201,7 @@ server {
         rewrite ^/bake/2.x/?(.*) /bake/2/$1 redirect;
     }
     location ~ ^/bake/?$ {
-        rewrite ^ /bake/2/en/index.html redirect;
+        rewrite ^ /bake/3/en/index.html redirect;
     }
     location ~ ^/bake/[123]/?$ {
         rewrite ^/bake/([^/]+) /bake/$1/en/index.html redirect;
@@ -229,7 +229,7 @@ server {
         rewrite ^/chronos/2.x/?(.*) /chronos/2/$1 redirect;
     }
     location ~ ^/chronos/?$ {
-        rewrite ^ /chronos/2/en/index.html redirect;
+        rewrite ^ /chronos/3/en/index.html redirect;
     }
     location ~ ^/chronos/[123]/?$ {
         rewrite ^/chronos/([^/]+) /chronos/$1/en/index.html redirect;
@@ -257,7 +257,7 @@ server {
         rewrite ^/debugkit/4.x/?(.*) /debugkit/4/$1 redirect;
     }
     location ~ ^/debugkit/?$ {
-        rewrite ^ /debugkit/4/en/index.html redirect;
+        rewrite ^ /debugkit/5/en/index.html redirect;
     }
     location ~ ^/debugkit/[345]/?$ {
         rewrite ^/debugkit/([^/]+) /debugkit/$1/en/index.html redirect;
@@ -284,7 +284,7 @@ server {
         rewrite ^/elasticsearch/2.x/?(.*) /elasticsearch/2/$1 redirect;
     }
     location ~ ^/elasticsearch/?$ {
-        rewrite ^ /elasticsearch/3/en/index.html redirect;
+        rewrite ^ /elasticsearch/4/en/index.html redirect;
     }
     location ~ ^/elasticsearch/[234]/?$ {
         rewrite ^/elasticsearch/([^/]+)/?$ /elasticsearch/$1/en/index.html redirect;
@@ -311,7 +311,7 @@ server {
         rewrite ^/migrations/2.x/?(.*) /migrations/2/$1 redirect;
     }
     location ~ ^/migrations/?$ {
-        rewrite ^ /migrations/2/en/index.html redirect;
+        rewrite ^ /migrations/4/en/index.html redirect;
     }
     location ~ ^/migrations/[234]/?$ {
         rewrite ^/migrations/([234])/?$ /migrations/$1/en/index.html redirect;
@@ -349,7 +349,7 @@ server {
 
     # Queue
     location ~ ^/queue/?$ {
-        rewrite ^ /queue/1/en/index.html redirect;
+        rewrite ^ /queue/2/en/index.html redirect;
     }
     location ~ ^/queue/[12]/?$ {
         rewrite ^/queue/([12])/?$ /queue/$1/en/index.html redirect;
@@ -444,16 +444,6 @@ server {
         proxy_set_header Host "book-11.cakephp.org";
         rewrite ^/1\.1(.*) /1.1$1 break;
         proxy_pass http://localhost:80;
-    }
-}
-
-server {
-    listen 80;
-    server_name book2.cakephp.org;
-
-    include {{ $.DOKKU_ROOT }}/{{ $.APP }}/nginx.conf.d/*.conf;
-    location / {
-        return 302 https://book.cakephp.org/2.0/$uri;
     }
 }
 
