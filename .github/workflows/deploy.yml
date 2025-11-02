@@ -4,7 +4,7 @@ name: 'deploy'
 on:
   push:
     branches:
-      - master
+      - newbook
   workflow_dispatch:
 
 concurrency:
@@ -22,6 +22,6 @@ jobs:
       - name: Push to dokku
         uses: dokku/github-action@master
         with:
-          git_remote_url: 'ssh://dokku@apps.cakephp.org:22/book'
+          git_remote_url: 'ssh://dokku@apps.cakephp.org:22/book-vitepress'
           git_push_flags: '-f'
           ssh_private_key: ${{ secrets.DOKKU_SSH_PRIVATE_KEY }}
