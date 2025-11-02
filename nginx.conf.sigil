@@ -1,27 +1,36 @@
+# Map version numbers to their corresponding proxy hosts
+map $version_number $proxy_host {
+    default "";
+    "5"     "newbook-5.cakephp.org";  # Current version
+    "4"     "newbook-4.cakephp.org";
+    "3"     "newbook-3.cakephp.org";
+    "2"     "newbook-2.cakephp.org";
+}
+
 server {
   listen      [::]:80;
   listen      80;
-  server_name book.cakephp.org;
-  access_log /var/log/nginx/book.cakephp.org-access.log;
-  error_log /var/log/nginx/book.cakephp.org-error.log;
+  server_name newbook.cakephp.org;
+  access_log /var/log/nginx/newbook.cakephp.org-access.log;
+  error_log /var/log/nginx/newbook.cakephp.org-error.log;
 
   include {{ $.DOKKU_ROOT }}/{{ $.APP }}/nginx.conf.d/*.conf;
   location / {
-    return 302 https://book.cakephp.org$request_uri;
+    return 302 https://newbook.cakephp.org$request_uri;
   }
 }
 
 server {
     listen      [::]:443 ssl http2;
     listen      443 ssl http2;
-    server_name book.cakephp.org;
-    access_log  /var/log/nginx/book.cakephp.org-access.log;
-    error_log   /var/log/nginx/book.cakephp.org-error.log;
+    server_name newbook.cakephp.org;
+    access_log  /var/log/nginx/newbook.cakephp.org-access.log;
+    error_log   /var/log/nginx/newbook.cakephp.org-error.log;
     index       index.html index.htm;
 
     ssl_certificate           {{ $.APP_SSL_PATH }}/server.crt;
     ssl_certificate_key       {{ $.APP_SSL_PATH }}/server.key;
-    ssl_protocols             TLSv1 TLSv1.1 TLSv1.2;
+    ssl_protocols             TLSv1.2 TLSv1.3;
 
     include {{ $.DOKKU_ROOT }}/{{ $.APP }}/nginx.conf.d/*.conf;
 
@@ -33,488 +42,40 @@ server {
         return 499;
     }
 
-    location ~ ^/(cache)?_?css/ {
+    # Enable gzip vary for static assets
+    location ~ ^/(public|fonts)/ {
         gzip_vary on;
     }
 
-    location ~ ^/(cache)?_?js/ {
-        gzip_vary on;
-    }
-
-    location ~ ^/img/ {
-        gzip_vary on;
-    }
-
-    location ~ ^/fonts/ {
-        gzip_vary on;
-    }
-
-    # Match / to the  current version of the docs published
+    # Redirect root to current version
     location ~ ^/$ {
-        rewrite ^ /5/en/ permanent;
+        rewrite ^ /5.x/ permanent;
     }
 
-    # Match /latest to the current version of the docs published
+    # Redirect /latest to current version
     location ~ ^/latest/?$ {
-        rewrite ^/latest/?$ /5/en/index.html redirect;
+        return 301 /5.x/;
     }
-    location ~ ^/latest/(.*)$ {
-        rewrite ^/latest/(.*)$ /5/$1 redirect;
-    }
-
-    #
-    # Rewrite version roots to english
-    #
-    # Handle /5.0 and /5
-    location ~ ^/5(\.0)?/?$ {
-        rewrite ^ /5/en/index.html redirect;
+    location ~ ^/latest/(.+)$ {
+        return 301 /5.x/$1;
     }
 
-    # Handle /5.0/en and /5/en
-    location ~ ^/5(\.0)?/([a-z][a-z])/?$ {
-        rewrite ^/5(?:\.0)?/([^/]+) /5/$1/index.html redirect;
+    # Rewrite old style URLs /5/en/ to /5.x/ (remove /en/)
+    # But keep other languages like /5/ja/ -> /5.x/ja/
+    location ~ ^/([2-9]|[1-9][0-9]+)/en/(.*)$ {
+        return 301 /$1.x/$2;
     }
 
-    # Handle /5.next
-    location ~ ^/5\.next/?$ {
-        rewrite ^ /5.next/en/index.html redirect;
-    }
-    # Handle /5.next/en
-    location ~ ^/5\.next/([a-z][a-z])/?$ {
-        rewrite ^/5\.next/([^/]+) /5.next/$1/index.html redirect;
+    location ~ ^/([2-9]|[1-9][0-9]+)/([a-z]{2})/(.*)$ {
+        return 301 /$1.x/$2/$3;
     }
 
-    # Handle /4.next
-    location ~ ^/4\.next/?$ {
-        rewrite ^/4\.next/([^/]+) /4.next/$1/index.html redirect;
-    }
-    # Handle /4.next/en
-    location ~ ^/4\.next/([a-z][a-z])/?$ {
-        rewrite ^/4\.next/([^/]+) /4.next/$1/index.html redirect;
-    }
+    # Proxy pass to version specific containers using map
+    location ~ ^/([2-9]|[1-9][0-9]+)\.x/(.*) {
+        set $version_number $1;
+        set $request_path $2;
 
-    # Handle /4.0/en and /4/en
-    location ~ ^/4(\.0)?/([a-z][a-z])/?$ {
-        rewrite ^/4(?:\.0)?/([^/]+) /4/$1/index.html redirect;
-    }
-
-    # Handle /4.0 and /4
-    location ~ ^/4(\.0)?/?$ {
-        rewrite ^ /4/en/index.html redirect;
-    }
-    # Handle /4.0/en and /4/en
-    location ~ ^/4(\.0)?/([a-z][a-z])/?$ {
-        rewrite ^/4(?:\.0)?/([^/]+) /4/$1/index.html redirect;
-    }
-
-    # Handle /3.next
-    location ~ ^/3\.next/?$ {
-        rewrite ^ /3.next/en/index.html permanent;
-    }
-    # Handle /3.next/en
-    location ~ ^/3\.next/([a-z][a-z])/?$ {
-        rewrite ^/3\.next/([^/]+) /3.next/$1/index.html redirect;
-    }
-
-    # Handle /3.0 and /3
-    location ~ ^/3(\.0)?/?$ {
-        rewrite ^ /3/en/index.html redirect;
-    }
-    # Handle /3.0/en and /3/en
-    location ~ ^/3(\.0)?/([a-z][a-z])/?$ {
-        rewrite ^/3(?:\.0)?/([^/]+) /3/$1/index.html redirect;
-    }
-
-    # Handle /2.0 and /2
-    location ~ ^/2(\.0)?/?$ {
-        rewrite ^ /2/en/index.html redirect;
-    }
-    # Handle /2.0/en and /2/en
-    location ~ ^/2(\.0)?/([a-z][a-z])/?$ {
-        rewrite ^/2(?:\.0)?/([^/]+) /2/$1/index.html redirect;
-    }
-
-    # 1.1, 1.2, 1.3 root paths
-    location ~ ^/1\.[123]/?$ {
-        rewrite ^/(1\.[123])/?$ /$1/en/index.html permanent;
-    }
-    location ~ ^/1\.[123]/([a-z][a-z])/?$ {
-        rewrite ^/(1\.[123])/([a-z][a-z])/?$ /$1/$2/index.html permanent;
-    }
-
-    #
-    # Plugin doc sites.
-    #
-
-    # Authentication
-    # Backwards compatibility aliases
-    location ~ ^/authentication/(1\.1|2\.[x0])/?(.*) {
-        rewrite ^/authentication/1\.1/?(.*) /authentication/1/$1 redirect;
-        rewrite ^/authentication/2\.[0x]/?(.*) /authentication/2/$1 redirect;
-    }
-    location ~ ^/authentication/?$ {
-        rewrite ^ /authentication/3/en/index.html redirect;
-    }
-    location ~ ^/authentication/latest/?$ {
-        rewrite ^/authentication/latest/?$ /authentication/3/en/index.html redirect;
-    }
-    location ~ ^/authentication/latest/(.*)$ {
-        rewrite ^/authentication/latest/(.*)$ /authentication/3/$1 redirect;
-    }
-    location ~ ^/authentication/(1|2|3)/?$ {
-        rewrite ^/authentication/([^/]+) /authentication/$1/en/index.html redirect;
-    }
-    location ~ ^/authentication/(1|2|3)/([a-z][a-z])/?$ {
-        rewrite ^/authentication/([^/]+)/([^/]+) /authentication/$1/$2/index.html redirect;
-    }
-    location ~ ^/authentication/1/?(.*)$ {
-        proxy_set_header Host "authentication-docs.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-    location ~ ^/authentication/2/?(.*)$ {
-        proxy_set_header Host "authentication-docs-2.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-    location ~ ^/authentication/3/?(.*)$ {
-        proxy_set_header Host "authentication-docs-3.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-
-    # Authorization
-    # Backwards compatibility aliases
-    location ~ ^/authorization/(1\.1|2\.[x0])/?(.*) {
-        rewrite ^/authorization/1\.1/?(.*) /authorization/1/$1 redirect;
-        rewrite ^/authorization/2\.[x0]/?(.*) /authorization/2/$1 redirect;
-    }
-    location ~ ^/authorization/?$ {
-        rewrite ^ /authorization/3/en/index.html redirect;
-    }
-    location ~ ^/authorization/latest/?$ {
-        rewrite ^/authorization/latest/?$ /authorization/3/en/index.html redirect;
-    }
-    location ~ ^/authorization/latest/(.*)$ {
-        rewrite ^/authorization/latest/(.*)$ /authorization/3/$1 redirect;
-    }
-    location ~ ^/authorization/(1|2|3)/?$ {
-        rewrite ^/authorization/([^/]+) /authorization/$1/en/index.html redirect;
-    }
-    location ~ ^/authorization/(1|2|3)/([a-z][a-z])/?$ {
-        rewrite ^/authorization/([^/]+)/([^/]+) /authorization/$1/$2/index.html redirect;
-    }
-    location ~ ^/authorization/1/?(.*)$ {
-        proxy_set_header Host "authorization-docs.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-    location ~ ^/authorization/2/?(.*)$ {
-        proxy_set_header Host "authorization-docs-2.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-    location ~ ^/authorization/3/?(.*)$ {
-        proxy_set_header Host "authorization-docs-3.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-
-    # Bake
-    # Backwards compatibility aliases
-    location ~ ^/bake/(1.x|2.x)/?(.*) {
-        rewrite ^/bake/1.x/?(.*) /bake/1/$1 redirect;
-        rewrite ^/bake/2.x/?(.*) /bake/2/$1 redirect;
-    }
-    location ~ ^/bake/?$ {
-        rewrite ^ /bake/3/en/index.html redirect;
-    }
-    location ~ ^/bake/latest/?$ {
-        rewrite ^/bake/latest/?$ /bake/3/en/index.html redirect;
-    }
-    location ~ ^/bake/latest/(.*)$ {
-        rewrite ^/bake/latest/(.*)$ /bake/3/$1 redirect;
-    }
-    location ~ ^/bake/[123]/?$ {
-        rewrite ^/bake/([^/]+) /bake/$1/en/index.html redirect;
-    }
-    location ~ ^/bake/[123]/([a-z][a-z])/?$ {
-        rewrite ^/bake/([^/]+)/([^/]+) /bake/$1/$2/index.html redirect;
-    }
-    location ~ ^/bake/1/(.*)$ {
-        proxy_set_header Host "bake-docs.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-    location ~ ^/bake/2/(.*)$ {
-        proxy_set_header Host "bake-docs-2.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-    location ~ ^/bake/3/(.*)$ {
-        proxy_set_header Host "bake-docs-3.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-
-    # Chronos
-    # Backwards compatibility aliases
-    location ~ ^/chronos/(1.x|2.x)/?(.*) {
-        rewrite ^/chronos/1.x/?(.*) /chronos/1/$1 redirect;
-        rewrite ^/chronos/2.x/?(.*) /chronos/2/$1 redirect;
-    }
-    location ~ ^/chronos/?$ {
-        rewrite ^ /chronos/3/en/index.html redirect;
-    }
-    location ~ ^/chronos/latest/?$ {
-        rewrite ^/chronos/latest/?$ /chronos/3/en/index.html redirect;
-    }
-    location ~ ^/chronos/latest/(.*)$ {
-        rewrite ^/chronos/latest/(.*)$ /chronos/3/$1 redirect;
-    }
-    location ~ ^/chronos/[123]/?$ {
-        rewrite ^/chronos/([^/]+) /chronos/$1/en/index.html redirect;
-    }
-    location ~ ^/chronos/[123]/([a-z][a-z])/?$ {
-        rewrite ^/chronos/([^/]+)/([^/]+) /chronos/$1/$2/index.html redirect;
-    }
-    location ~ ^/chronos/1/(.*)$ {
-        proxy_set_header Host "chronos-docs.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-    location ~ ^/chronos/2/(.*)$ {
-        proxy_set_header Host "chronos-docs-2.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-    location ~ ^/chronos/3/(.*)$ {
-        proxy_set_header Host "chronos-docs-3.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-
-    # DebugKit
-    # Backwards compatibility aliases
-    location ~ ^/debugkit/(3.x|4.x)/?(.*) {
-        rewrite ^/debugkit/3.x/?(.*) /debugkit/3/$1 redirect;
-        rewrite ^/debugkit/4.x/?(.*) /debugkit/4/$1 redirect;
-    }
-    location ~ ^/debugkit/?$ {
-        rewrite ^ /debugkit/5/en/index.html redirect;
-    }
-    location ~ ^/debugkit/latest/?$ {
-        rewrite ^/debugkit/latest/?$ /debugkit/5/en/index.html redirect;
-    }
-    location ~ ^/debugkit/latest/(.*)$ {
-        rewrite ^/debugkit/latest/(.*)$ /debugkit/5/$1 redirect;
-    }
-    location ~ ^/debugkit/[345]/?$ {
-        rewrite ^/debugkit/([^/]+) /debugkit/$1/en/index.html redirect;
-    }
-    location ~ ^/debugkit/[345]/([a-z][a-z])/?$ {
-        rewrite ^/debugkit/([^/]+)/([^/]+) /debugkit/$1/$2/index.html redirect;
-    }
-    location ~ ^/debugkit/3/?(.*)$ {
-        proxy_set_header Host "debugkit-docs.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-    location ~ ^/debugkit/4/?(.*)$ {
-        proxy_set_header Host "debugkit-docs-4.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-    location ~ ^/debugkit/5/?(.*)$ {
-        proxy_set_header Host "debugkit-docs-5.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-
-    # Elasticsearch
-    # Backwards compatibility aliases
-    location ~ ^/elasticsearch/2.x/?(.*) {
-        rewrite ^/elasticsearch/2.x/?(.*) /elasticsearch/2/$1 redirect;
-    }
-    location ~ ^/elasticsearch/?$ {
-        rewrite ^ /elasticsearch/4/en/index.html redirect;
-    }
-    location ~ ^/elasticsearch/latest/?$ {
-        rewrite ^/elasticsearch/latest/?$ /elasticsearch/4/en/index.html redirect;
-    }
-    location ~ ^/elasticsearch/latest/(.*)$ {
-        rewrite ^/elasticsearch/latest/(.*)$ /elasticsearch/4/$1 redirect;
-    }
-    location ~ ^/elasticsearch/[234]/?$ {
-        rewrite ^/elasticsearch/([^/]+)/?$ /elasticsearch/$1/en/index.html redirect;
-    }
-    location ~ ^/elasticsearch/[234]/([a-z][a-z])/?$ {
-        rewrite ^/elasticsearch/([^/]+)/([^/]+) /elasticsearch/$1/$2/index.html redirect;
-    }
-    location ~ ^/elasticsearch/2/?(.*)$ {
-        proxy_set_header Host "elasticsearch-docs.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-    location ~ ^/elasticsearch/3/?(.*)$ {
-        proxy_set_header Host "elasticsearch-docs-3.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-    location ~ ^/elasticsearch/4/?(.*)$ {
-        proxy_set_header Host "elasticsearch-docs-4.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-
-    # Migrations
-    # Backwards compatibility aliases
-    location ~ ^/migrations/2.x/?(.*) {
-        rewrite ^/migrations/2.x/?(.*) /migrations/2/$1 redirect;
-    }
-    location ~ ^/migrations/?$ {
-        rewrite ^ /migrations/4/en/index.html redirect;
-    }
-    location ~ ^/migrations/latest/?$ {
-        rewrite ^/migrations/latest/?$ /migrations/4/en/index.html redirect;
-    }
-    location ~ ^/migrations/latest/(.*)$ {
-        rewrite ^/migrations/latest/(.*)$ /migrations/4/$1 redirect;
-    }
-    location ~ ^/migrations/[234]/?$ {
-        rewrite ^/migrations/([234])/?$ /migrations/$1/en/index.html redirect;
-    }
-    location ~ ^/migrations/([234])/([a-z][a-z])/?$ {
-        rewrite ^/migrations/([234])/([^/]+) /migrations/$1/$2/index.html redirect;
-    }
-    location ~ ^/migrations/2/?(.*)$ {
-        proxy_set_header Host "migrations-docs.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-    location ~ ^/migrations/3/?(.*)$ {
-        proxy_set_header Host "migrations-docs-3.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-    location ~ ^/migrations/4/?(.*)$ {
-        proxy_set_header Host "migrations-docs-4.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-
-    # Phinx
-    location ~ ^/phinx/?$ {
-        rewrite ^ /phinx/0/en/index.html redirect;
-    }
-    location ~ ^/phinx/0/?$ {
-        rewrite ^ /phinx/0/en/index.html redirect;
-    }
-    location ~ ^/phinx/latest/?$ {
-        rewrite ^/phinx/latest/?$ /phinx/0/en/index.html redirect;
-    }
-    location ~ ^/phinx/latest/(.*)$ {
-        rewrite ^/phinx/latest/(.*)$ /phinx/0/$1 redirect;
-    }
-    location ~ ^/phinx/0/([a-z][a-z])/?$ {
-        rewrite ^/phinx/0/([^/]+) /phinx/0/$1/index.html redirect;
-    }
-    location ~ ^/phinx/0/?(.*)$ {
-        proxy_set_header Host "phinx-docs.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-
-    # Queue
-    location ~ ^/queue/?$ {
-        rewrite ^ /queue/2/en/index.html redirect;
-    }
-    location ~ ^/queue/[12]/?$ {
-        rewrite ^/queue/([12])/?$ /queue/$1/en/index.html redirect;
-    }
-    location ~ ^/queue/latest/?$ {
-        rewrite ^/queue/latest/?$ /queue/2/en/index.html redirect;
-    }
-    location ~ ^/queue/latest/(.*)$ {
-        rewrite ^/queue/latest/(.*)$ /queue/2/$1 redirect;
-    }
-    location ~ ^/queue/[12]/([a-z][a-z])/?$ {
-        rewrite ^/queue/([12])/([^/]+) /queue/$1/$2/index.html redirect;
-    }
-    location ~ ^/queue/1/?(.*)$ {
-        proxy_set_header Host "queue-docs-1.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-    location ~ ^/queue/2/?(.*)$ {
-        proxy_set_header Host "queue-docs-2.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-
-    # Favicon
-    location ~ ^/favicon.ico {
-        rewrite ^ /3.0/en/_static/favicon.ico permanent;
-    }
-
-    location  ~ ^/view(.*) {
-        proxy_set_header Host "book-13.cakephp.org";
-        rewrite ^/view(.*) /1.3$1 break;
-        proxy_pass http://localhost:80;
-    }
-
-    # Rewrite long version numbers to the newer short ones.
-    location ~ ^/5.0/(.*) {
-        rewrite ^/5.0/(.*) /5/$1 redirect;
-    }
-    location ~ ^/4.0/(.*) {
-        rewrite ^/4.0/(.*) /4/$1 redirect;
-    }
-    location ~ ^/3.0/(.*) {
-        rewrite ^/3.0/(.*) /3/$1 redirect;
-    }
-    location ~ ^/2.0/(.*) {
-        rewrite ^/2.0/(.*) /2/$1 redirect;
-    }
-
-    # Proxy pass to version specific containers.
-    location ~ ^/5\.next/(.*) {
-        proxy_set_header Host "book-5next.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-
-    location ~ ^/5/(.*) {
-        proxy_set_header Host "book-5.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-
-    location ~ ^/4\.next/(.*) {
-        proxy_set_header Host "book-4next.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-
-    location ~ ^/4/(.*) {
-        proxy_set_header Host "book-4.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-
-    location ~ ^/3\.next/(.*) {
-        proxy_set_header Host "book-3next.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-
-    location ~ ^/3/(.*) {
-        proxy_set_header Host "book-3.cakephp.org";
-        rewrite ^/3(.*) /3.0$1 break;
-        proxy_pass http://localhost:80/$1;
-    }
-
-    location ~ ^/2/(.*) {
-        proxy_set_header Host "book-2.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
-
-    location ~ ^/1\.3(.*) {
-        proxy_set_header Host "book-13.cakephp.org";
-        rewrite ^/1\.3(.*) /1.3$1 break;
-        proxy_pass http://localhost:80;
-    }
-
-    location ~ ^/1\.2(.*) {
-        proxy_set_header Host "book-12.cakephp.org";
-        rewrite ^/1\.2(.*) /1.2$1 break;
-        proxy_pass http://localhost:80;
-    }
-
-    location ~ ^/1\.1(.*) {
-        proxy_set_header Host "book-11.cakephp.org";
-        rewrite ^/1\.1(.*) /1.1$1 break;
-        proxy_pass http://localhost:80;
-    }
-}
-
-server {
-    listen 80;
-    server_name www.book.cakephp.org manual.cakephp.org;
-
-    include {{ $.DOKKU_ROOT }}/{{ $.APP }}/nginx.conf.d/*.conf;
-    location / {
-        return 302 https://book.cakephp.org$uri;
+        proxy_set_header Host $proxy_host;
+        proxy_pass http://localhost:80/$request_path;
     }
 }
