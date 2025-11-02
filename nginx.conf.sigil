@@ -60,14 +60,20 @@ server {
         return 301 /5.x/$1;
     }
 
-    # Rewrite old style URLs /5/en/ to /5.x/ (remove /en/)
-    # But keep other languages like /5/ja/ -> /5.x/ja/
+    # Rewrite old style URLs to new .x format
+    # /5/en/something.html -> /5.x/something.html (remove /en/)
     location ~ "^/([2-9]|[1-9][0-9]+)/en/(.*)$" {
         return 301 /$1.x/$2;
     }
 
+    # /5/ja/something.html -> /5.x/ja/something.html (keep language code)
     location ~ "^/([2-9]|[1-9][0-9]+)/([a-z]{2})/(.*)$" {
         return 301 /$1.x/$2/$3;
+    }
+
+    # /5/something.html -> /5.x/something.html (no language code)
+    location ~ "^/([2-9]|[1-9][0-9]+)/(.*)$" {
+        return 301 /$1.x/$2;
     }
 
     # Proxy pass to version specific containers using map
