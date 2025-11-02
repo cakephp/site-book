@@ -62,16 +62,16 @@ server {
 
     # Rewrite old style URLs /5/en/ to /5.x/ (remove /en/)
     # But keep other languages like /5/ja/ -> /5.x/ja/
-    location ~ ^/([2-9]|[1-9][0-9]+)/en/(.*)$ {
+    location ~ "^/([2-9]|[1-9][0-9]+)/en/(.*)$" {
         return 301 /$1.x/$2;
     }
 
-    location ~ ^/([2-9]|[1-9][0-9]+)/([a-z]{2})/(.*)$ {
+    location ~ "^/([2-9]|[1-9][0-9]+)/([a-z]{2})/(.*)$" {
         return 301 /$1.x/$2/$3;
     }
 
     # Proxy pass to version specific containers using map
-    location ~ ^/([2-9]|[1-9][0-9]+)\.x/(.*) {
+    location ~ "^/([2-9]|[1-9][0-9]+)\.x/(.*)" {
         set $version_number $1;
         set $request_path $2;
 
