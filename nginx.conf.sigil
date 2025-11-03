@@ -42,10 +42,8 @@ server {
         return 499;
     }
 
-    # Enable gzip vary for static assets
-    location ~ ^/(public|fonts)/ {
-        gzip_vary on;
-    }
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
 
     # Redirect root to current version
     location ~ ^/$ {
@@ -80,6 +78,16 @@ server {
     location ~ "^/([2-9]|[1-9][0-9]+)\.x/(.*)" {
         set $version_number $1;
         set $request_path $2;
+
+        # Cache static assets
+        if ($request_path ~* ^(public|fonts|assets)/) {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+
+        # Intercept errors from upstream and serve version-specific 404 page
+        proxy_intercept_errors on;
+        error_page 404 403 /$version_number.x/404.html;
 
         proxy_set_header Host $proxy_host;
         proxy_pass http://localhost:80/$request_path;
