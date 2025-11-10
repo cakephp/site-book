@@ -330,10 +330,10 @@ server {
     location ~ ^/elasticsearch/latest/(.*)$ {
         rewrite ^/elasticsearch/latest/(.*)$ /elasticsearch/4/$1 redirect;
     }
-    location ~ ^/elasticsearch/[234]/?$ {
+    location ~ ^/elasticsearch/[2345]/?$ {
         rewrite ^/elasticsearch/([^/]+)/?$ /elasticsearch/$1/en/index.html redirect;
     }
-    location ~ ^/elasticsearch/[234]/([a-z][a-z])/?$ {
+    location ~ ^/elasticsearch/[2345]/([a-z][a-z])/?$ {
         rewrite ^/elasticsearch/([^/]+)/([^/]+) /elasticsearch/$1/$2/index.html redirect;
     }
     location ~ ^/elasticsearch/2/?(.*)$ {
@@ -346,6 +346,10 @@ server {
     }
     location ~ ^/elasticsearch/4/?(.*)$ {
         proxy_set_header Host "elasticsearch-docs-4.cakephp.org";
+        proxy_pass http://localhost:80/$1;
+    }
+    location ~ ^/elasticsearch/5/?(.*)$ {
+        proxy_set_header Host "elasticsearch-docs-5.cakephp.org";
         proxy_pass http://localhost:80/$1;
     }
 
