@@ -359,19 +359,19 @@ server {
         rewrite ^/migrations/2.x/?(.*) /migrations/2/$1 redirect;
     }
     location ~ ^/migrations/?$ {
-        rewrite ^ /migrations/4/en/index.html redirect;
+        rewrite ^ /migrations/5/en/index.html redirect;
     }
     location ~ ^/migrations/latest/?$ {
-        rewrite ^/migrations/latest/?$ /migrations/4/en/index.html redirect;
+        rewrite ^/migrations/latest/?$ /migrations/5/en/index.html redirect;
     }
     location ~ ^/migrations/latest/(.*)$ {
-        rewrite ^/migrations/latest/(.*)$ /migrations/4/$1 redirect;
+        rewrite ^/migrations/latest/(.*)$ /migrations/5/$1 redirect;
     }
-    location ~ ^/migrations/[234]/?$ {
-        rewrite ^/migrations/([234])/?$ /migrations/$1/en/index.html redirect;
+    location ~ ^/migrations/[2345]/?$ {
+        rewrite ^/migrations/([2345])/?$ /migrations/$1/en/index.html redirect;
     }
-    location ~ ^/migrations/([234])/([a-z][a-z])/?$ {
-        rewrite ^/migrations/([234])/([^/]+) /migrations/$1/$2/index.html redirect;
+    location ~ ^/migrations/([2345])/([a-z][a-z])/?$ {
+        rewrite ^/migrations/([2345])/([^/]+) /migrations/$1/$2/index.html redirect;
     }
     location ~ ^/migrations/2/?(.*)$ {
         proxy_set_header Host "migrations-docs.cakephp.org";
@@ -383,6 +383,10 @@ server {
     }
     location ~ ^/migrations/4/?(.*)$ {
         proxy_set_header Host "migrations-docs-4.cakephp.org";
+        proxy_pass http://localhost:80/$1;
+    }
+    location ~ ^/migrations/5/?(.*)$ {
+        proxy_set_header Host "migrations-docs-5.cakephp.org";
         proxy_pass http://localhost:80/$1;
     }
 
