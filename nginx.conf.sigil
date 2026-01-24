@@ -1,10 +1,85 @@
-# Map version numbers to their corresponding proxy hosts
-map $version_number $proxy_host {
+# Map core documentation versions to their corresponding proxy hosts
+map $doc_version $doc_host {
     default "";
-    "5"     "newbook-5.cakephp.org";  # Current version
-    "4"     "newbook-4.cakephp.org";
-    "3"     "newbook-3.cakephp.org";
-    "2"     "newbook-2.cakephp.org";
+    
+    # Current stable versions
+    "5"      "newbook-5.cakephp.org";
+    "4"      "newbook-4.cakephp.org";
+    "3"      "newbook-3.cakephp.org";
+    "2"      "newbook-2.cakephp.org";
+    
+    # Development/pre-release versions
+    "5.next" "newbook-5next.cakephp.org";
+    "4.next" "newbook-4next.cakephp.org";
+    "3.next" "newbook-3next.cakephp.org";
+    
+    # Legacy versions
+    "1.3"    "newbook-13.cakephp.org";
+    "1.2"    "newbook-12.cakephp.org";
+    "1.1"    "newbook-11.cakephp.org";
+}
+
+# Plugin latest version map
+map $plugin_name $plugin_latest {
+    default                 "";
+    "authentication"        "3";
+    "authorization"         "3";
+    "bake"                  "3";
+    "chronos"               "3";
+    "debugkit"              "5";
+    "elasticsearch"         "5";
+    "migrations"            "5";
+    "phinx"                 "0";
+    "queue"                 "2";
+}
+
+# Plugin version to host mapping
+map "$plugin_name-$plugin_version" $plugin_host {
+    default                     "";
+
+    # Authentication
+    "authentication-1"          "authentication-docs.cakephp.org";
+    "authentication-2"          "authentication-docs-2.cakephp.org";
+    "authentication-3"          "authentication-docs-3.cakephp.org";
+
+    # Authorization
+    "authorization-1"           "authorization-docs.cakephp.org";
+    "authorization-2"           "authorization-docs-2.cakephp.org";
+    "authorization-3"           "authorization-docs-3.cakephp.org";
+
+    # Bake
+    "bake-1"                    "bake-docs.cakephp.org";
+    "bake-2"                    "bake-docs-2.cakephp.org";
+    "bake-3"                    "bake-docs-3.cakephp.org";
+
+    # Chronos
+    "chronos-1"                 "chronos-docs.cakephp.org";
+    "chronos-2"                 "chronos-docs-2.cakephp.org";
+    "chronos-3"                 "chronos-docs-3.cakephp.org";
+
+    # DebugKit
+    "debugkit-3"                "debugkit-docs.cakephp.org";
+    "debugkit-4"                "debugkit-docs-4.cakephp.org";
+    "debugkit-5"                "debugkit-docs-5.cakephp.org";
+
+    # Elasticsearch
+    "elasticsearch-2"           "elasticsearch-docs.cakephp.org";
+    "elasticsearch-3"           "elasticsearch-docs-3.cakephp.org";
+    "elasticsearch-4"           "elasticsearch-docs-4.cakephp.org";
+    "elasticsearch-5"           "elasticsearch-docs-5.cakephp.org";
+
+    # Migrations
+    "migrations-2"              "migrations-docs.cakephp.org";
+    "migrations-3"              "migrations-docs-3.cakephp.org";
+    "migrations-4"              "migrations-docs-4.cakephp.org";
+    "migrations-5"              "migrations-docs-5.cakephp.org";
+
+    # Phinx
+    "phinx-0"                   "phinx-docs.cakephp.org";
+
+    # Queue
+    "queue-1"                   "queue-docs-1.cakephp.org";
+    "queue-2"                   "queue-docs-2.cakephp.org";
 }
 
 server {
@@ -58,6 +133,49 @@ server {
         return 301 /5.x/$1;
     }
 
+    # ========================================
+    # Version root and language redirects
+    # ========================================
+
+    # Redirect .next version roots to English index
+    location ~ ^/(5|4|3)\.next/?$ {
+        return 301 /$1.next/en/;
+    }
+    # Redirect .next version with language code
+    location ~ "^/(5|4|3)\.next/([a-z]{2})/?$" {
+        return 301 /$1.next/$2/;
+    }
+
+    # Redirect bare version numbers to version.x format with English
+    # /5 → /5.x/en/
+    location ~ ^/([2-5])/?$ {
+        return 301 /$1.x/en/;
+    }
+
+    # Redirect version with language code to .x format
+    # /5/en → /5.x/en/, /5/ja → /5.x/ja/
+    location ~ "^/([2-5])/([a-z]{2})/?$" {
+        return 301 /$1.x/$2/;
+    }
+
+    # Legacy 1.x version root redirects
+    location ~ ^/(1\.[123])/?$ {
+        return 301 /$1/en/;
+    }
+    location ~ "^/(1\.[123])/([a-z]{2})/?$" {
+        return 301 /$1/$2/;
+    }
+
+    # ========================================
+    # Backward compatibility redirects
+    # ========================================
+
+    # Redirect long version numbers to short .x format
+    # /5.0/something → /5.x/something
+    location ~ "^/(5|4|3|2)\.0/(.*)$" {
+        return 301 /$1.x/$2;
+    }
+
     # Rewrite old style URLs to new .x format
     # /5/en/something.html -> /5.x/something.html (remove /en/)
     location ~ "^/([2-9]|[1-9][0-9]+)/en/(.*)$" {
@@ -74,9 +192,131 @@ server {
         return 301 /$1.x/$2;
     }
 
+    # ========================================
+    # Development/pre-release documentation (.next versions)
+    # ========================================
+
+    location ~ "^/(5|4|3)\.next/(.*)" {
+        set $doc_version $1.next;
+        set $request_path $2;
+
+        # Cache static assets
+        if ($request_path ~* ^(public|fonts|assets)/) {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+
+        proxy_intercept_errors on;
+        error_page 404 403 /$doc_version/404.html;
+
+        proxy_set_header Host $doc_host;
+        proxy_pass http://localhost:80/$request_path;
+    }
+
+    # ========================================
+    # Legacy 1.x documentation
+    # ========================================
+
+    location ~ "^/(1\.[123])/(.*)" {
+        set $doc_version $1;
+        set $request_path $2;
+
+        # Cache static assets
+        if ($request_path ~* ^(public|fonts|assets)/) {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+
+        proxy_intercept_errors on;
+        error_page 404 403 /$doc_version/404.html;
+
+        proxy_set_header Host $doc_host;
+        proxy_pass http://localhost:80/$request_path;
+    }
+
+    # ========================================
+    # PLUGIN DOCUMENTATION
+    # ========================================
+    # Plugins: authentication, authorization, bake, chronos, debugkit,
+    #          elasticsearch, migrations, phinx, queue
+
+    # Backwards compatibility aliases (X.x → X format)
+    location ~ "^/(authentication|authorization)/(1\.1|2\.[x0])/?(.*)"
+    {
+        rewrite ^/authentication/1\.1/?(.*) /authentication/1/$1 redirect;
+        rewrite ^/authentication/2\.[x0]/?(.*) /authentication/2/$1 redirect;
+        rewrite ^/authorization/1\.1/?(.*) /authorization/1/$1 redirect;
+        rewrite ^/authorization/2\.[x0]/?(.*) /authorization/2/$1 redirect;
+    }
+
+    location ~ "^/(bake|chronos)/([12])\.x/?(.*)"
+    {
+        rewrite ^/(bake|chronos)/([12])\.x/?(.*) /$1/$2/$3 redirect;
+    }
+
+    location ~ "^/debugkit/([34])\.x/?(.*)"
+    {
+        rewrite ^/debugkit/([34])\.x/?(.*) /debugkit/$1/$2 redirect;
+    }
+
+    location ~ "^/elasticsearch/2\.x/?(.*)"
+    {
+        rewrite ^/elasticsearch/2\.x/?(.*) /elasticsearch/2/$1 redirect;
+    }
+
+    location ~ "^/migrations/2\.x/?(.*)"
+    {
+        rewrite ^/migrations/2\.x/?(.*) /migrations/2/$1 redirect;
+    }
+
+    # Plugin root redirects to latest version
+    location ~ ^/(authentication|authorization|bake|chronos|debugkit|elasticsearch|migrations|phinx|queue)/?$ {
+        set $plugin_name $1;
+        return 301 /$plugin_name/$plugin_latest/en/;
+    }
+
+    # Plugin /latest redirects
+    location ~ ^/(authentication|authorization|bake|chronos|debugkit|elasticsearch|migrations|phinx|queue)/latest/?$ {
+        set $plugin_name $1;
+        return 301 /$plugin_name/$plugin_latest/en/;
+    }
+
+    location ~ ^/(authentication|authorization|bake|chronos|debugkit|elasticsearch|migrations|phinx|queue)/latest/(.*)$ {
+        set $plugin_name $1;
+        return 301 /$plugin_name/$plugin_latest/$2;
+    }
+
+    # Plugin version root redirects (version → version/en/)
+    location ~ ^/(authentication|authorization|bake|chronos|debugkit|elasticsearch|migrations|phinx|queue)/([0-9]+)/?$ {
+        return 301 /$1/$2/en/;
+    }
+
+    # Plugin proxy pass (unified for all plugins using maps)
+    location ~ ^/(authentication|authorization|bake|chronos|debugkit|elasticsearch|migrations|phinx|queue)/([0-9]+)/?(.*)$ {
+        set $plugin_name $1;
+        set $plugin_version $2;
+        set $request_path $3;
+
+        # Cache static assets
+        if ($request_path ~* ^(public|fonts|assets)/) {
+            expires 1y;
+            add_header Cache-Control "public, immutable";
+        }
+
+        proxy_intercept_errors on;
+        error_page 404 403 /$plugin_name/$plugin_version/404.html;
+
+        proxy_set_header Host $plugin_host;
+        proxy_pass http://localhost:80/$request_path;
+    }
+
+    # ========================================
+    # Main version documentation (2.x - 5.x)
+    # ========================================
+
     # Proxy pass to version specific containers using map
     location ~ "^/([2-9]|[1-9][0-9]+)\.x/(.*)" {
-        set $version_number $1;
+        set $doc_version $1;
         set $request_path $2;
 
         # Cache static assets
@@ -87,9 +327,9 @@ server {
 
         # Intercept errors from upstream and serve version-specific 404 page
         proxy_intercept_errors on;
-        error_page 404 403 /$version_number.x/404.html;
+        error_page 404 403 /$doc_version.x/404.html;
 
-        proxy_set_header Host $proxy_host;
+        proxy_set_header Host $doc_host;
         proxy_pass http://localhost:80/$request_path;
     }
 }
