@@ -1,18 +1,20 @@
 # Map core documentation versions to their corresponding proxy hosts
 map $doc_version $doc_host {
     default "";
-    
+
     # Current stable versions
+    "6"      "newbook-6.cakephp.org";
     "5"      "newbook-5.cakephp.org";
     "4"      "newbook-4.cakephp.org";
     "3"      "newbook-3.cakephp.org";
     "2"      "newbook-2.cakephp.org";
-    
+
     # Development/pre-release versions
+    "6.next" "newbook-6next.cakephp.org";
     "5.next" "newbook-5next.cakephp.org";
     "4.next" "newbook-4next.cakephp.org";
     "3.next" "newbook-3next.cakephp.org";
-    
+
     # Legacy versions
     "1.3"    "newbook-13.cakephp.org";
     "1.2"    "newbook-12.cakephp.org";
@@ -138,23 +140,23 @@ server {
     # ========================================
 
     # Redirect .next version roots to English index
-    location ~ ^/(5|4|3)\.next/?$ {
+    location ~ ^/(6|5|4|3)\.next/?$ {
         return 301 /$1.next/en/;
     }
     # Redirect .next version with language code
-    location ~ "^/(5|4|3)\.next/([a-z]{2})/?$" {
+    location ~ "^/(6|5|4|3)\.next/([a-z]{2})/?$" {
         return 301 /$1.next/$2/;
     }
 
     # Redirect bare version numbers to version.x format with English
     # /5 → /5.x/en/
-    location ~ ^/([2-5])/?$ {
+    location ~ ^/([2-6])/?$ {
         return 301 /$1.x/en/;
     }
 
     # Redirect version with language code to .x format
     # /5/en → /5.x/en/, /5/ja → /5.x/ja/
-    location ~ "^/([2-5])/([a-z]{2})/?$" {
+    location ~ "^/([2-6])/([a-z]{2})/?$" {
         return 301 /$1.x/$2/;
     }
 
@@ -172,7 +174,7 @@ server {
 
     # Redirect long version numbers to short .x format
     # /5.0/something → /5.x/something
-    location ~ "^/(5|4|3|2)\.0/(.*)$" {
+    location ~ "^/(6|5|4|3|2)\.0/(.*)$" {
         return 301 /$1.x/$2;
     }
 
@@ -196,7 +198,7 @@ server {
     # Development/pre-release documentation (.next versions)
     # ========================================
 
-    location ~ "^/(5|4|3)\.next/(.*)" {
+    location ~ "^/(6|5|4|3)\.next/(.*)" {
         set $doc_version $1.next;
         set $request_path $2;
 
