@@ -139,12 +139,8 @@ server {
     # Version root and language redirects
     # ========================================
 
-    # Redirect .next version roots to English index
-    location ~ ^/(6|5|4|3)\.next/?$ {
-        return 301 /$1.next/en/;
-    }
-    # Redirect .next version with language code
-    location ~ "^/(6|5|4|3)\.next/([a-z]{2})/?$" {
+    # Redirect .next version with language code to ensure trailing slash
+    location ~ "^/(6|5|4|3)\.next/([a-z]{2})$" {
         return 301 /$1.next/$2/;
     }
 
