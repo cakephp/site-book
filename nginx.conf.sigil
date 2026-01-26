@@ -336,6 +336,11 @@ server {
         error_page 404 403 /$doc_version.x/404.html;
 
         proxy_set_header Host $doc_host;
+
+        # Rewrite upstream absolute redirects back to book.cakephp.org
+        proxy_redirect https://$doc_host/ https://book.cakephp.org/$doc_version.x/;
+        proxy_redirect http://$doc_host/  https://book.cakephp.org/$doc_version.x/;
+
         proxy_pass http://localhost:80/$request_path;
     }
 }
