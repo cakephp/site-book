@@ -1,7 +1,7 @@
-## NGINX Configuration for book.cakephp.org
+## NGINX Configuration for newbook.cakephp.org
 
 This repository contains primarily just the NGINX configuration used to serve the
-[book.cakephp.org](https://book.cakephp.org) website and all its versions.
+[newbook.cakephp.org](https://newbook.cakephp.org) website and all its versions.
 
 Changes commited to this branch get auto deployed via dokku to our server and applied immediately.
 
