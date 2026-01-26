@@ -1,22 +1,22 @@
 server {
   listen      [::]:80;
   listen      80;
-  server_name book.cakephp.org;
-  access_log /var/log/nginx/book.cakephp.org-access.log;
-  error_log /var/log/nginx/book.cakephp.org-error.log;
+  server_name legacybook.cakephp.org;
+  access_log /var/log/nginx/legacybook.cakephp.org-access.log;
+  error_log /var/log/nginx/legacybook.cakephp.org-error.log;
 
   include {{ $.DOKKU_ROOT }}/{{ $.APP }}/nginx.conf.d/*.conf;
   location / {
-    return 302 https://book.cakephp.org$request_uri;
+    return 302 https://legacybook.cakephp.org$request_uri;
   }
 }
 
 server {
     listen      [::]:443 ssl http2;
     listen      443 ssl http2;
-    server_name book.cakephp.org;
-    access_log  /var/log/nginx/book.cakephp.org-access.log;
-    error_log   /var/log/nginx/book.cakephp.org-error.log;
+    server_name legacybook.cakephp.org;
+    access_log  /var/log/nginx/legacybook.cakephp.org-access.log;
+    error_log   /var/log/nginx/legacybook.cakephp.org-error.log;
     index       index.html index.htm;
 
     ssl_certificate           {{ $.APP_SSL_PATH }}/server.crt;
@@ -519,10 +519,10 @@ server {
 
 server {
     listen 80;
-    server_name www.book.cakephp.org manual.cakephp.org;
+    server_name www.legacybook.cakephp.org legacymanual.cakephp.org;
 
     include {{ $.DOKKU_ROOT }}/{{ $.APP }}/nginx.conf.d/*.conf;
     location / {
-        return 302 https://book.cakephp.org$uri;
+        return 302 https://legacybook.cakephp.org$uri;
     }
 }
