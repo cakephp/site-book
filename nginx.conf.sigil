@@ -1,3 +1,11 @@
+# Upstream for localhost backend with connection pooling
+upstream backend {
+    server localhost:80;
+    keepalive 128;
+    keepalive_requests 1000;
+    keepalive_timeout 60s;
+}
+
 # Map core documentation versions to their corresponding proxy hosts
 map $doc_version $doc_host {
     default "";
@@ -257,7 +265,9 @@ server {
         error_page 404 403 /$doc_version/404.html;
 
         proxy_set_header Host $doc_host;
-        proxy_pass http://localhost:80/$request_path;
+        proxy_set_header Connection "";
+        proxy_http_version 1.1;
+        proxy_pass http://backend/$request_path;
     }
 
     # ========================================
@@ -278,7 +288,9 @@ server {
         error_page 404 403 /$doc_version/404.html;
 
         proxy_set_header Host $doc_host;
-        proxy_pass http://localhost:80/$request_path;
+        proxy_set_header Connection "";
+        proxy_http_version 1.1;
+        proxy_pass http://backend/$request_path;
     }
 
     # ========================================
@@ -382,7 +394,9 @@ server {
         error_page 404 403 /$plugin_name/$plugin_version/404.html;
 
         proxy_set_header Host $plugin_host;
-        proxy_pass http://localhost:80/$request_path;
+        proxy_set_header Connection "";
+        proxy_http_version 1.1;
+        proxy_pass http://backend/$request_path;
     }
 
     # ========================================
@@ -405,6 +419,8 @@ server {
         error_page 404 403 /$doc_version.x/404.html;
 
         proxy_set_header Host $doc_host;
-        proxy_pass http://localhost:80/$request_path;
+        proxy_set_header Connection "";
+        proxy_http_version 1.1;
+        proxy_pass http://backend/$request_path;
     }
 }
