@@ -167,6 +167,40 @@ server {
         rewrite ^ /$current_version.x/sitemap.xml last;
     }
 
+    # Serve robots.txt
+    location = /robots.txt {
+        add_header Content-Type text/plain;
+        return 200 "# CakePHP Documentation - robots.txt
+User-agent: *
+
+# Default: Allow everything
+Allow: /
+
+# Block deprecated language paths (these redirect)
+Disallow: /*/fr/
+Disallow: /*/pt/
+Disallow: /*/es/
+Disallow: /*/ru/
+Disallow: /*/tr/
+Disallow: /*/zh/
+Disallow: /*/de/
+Disallow: /*/ms/
+Disallow: /*/go/
+Disallow: /*/en/
+
+# Block development versions (constantly changing)
+Disallow: /*.next/
+
+# Block legacy versions (redirect to legacybook.cakephp.org)
+Disallow: /1.1/
+Disallow: /1.2/
+Disallow: /1.3/
+
+# Sitemap
+Sitemap: https://book.cakephp.org/sitemap.xml
+";
+    }
+
     # ========================================
     # Version root and language redirects
     # ========================================
