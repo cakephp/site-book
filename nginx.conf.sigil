@@ -84,6 +84,15 @@ map "$plugin_name-$plugin_version" $plugin_host {
     "queue-2"                   "queue-docs-2.cakephp.org";
 }
 
+# Upstream for Dokku's nginx with keepalive connection pooling
+# max_fails=0 prevents marking upstream as "down" during brief unavailability
+upstream backend {
+    server localhost:80 max_fails=0;
+    keepalive 64;
+    keepalive_requests 1000;
+    keepalive_timeout 60s;
+}
+
 # Rate limiting zones
 # Limit based on Cloudflare connecting IP (real client IP)
 limit_req_zone $http_cf_connecting_ip zone=perip:10m rate=30r/s;
@@ -275,7 +284,9 @@ server {
         error_page 404 403 /$doc_version/404.html;
 
         proxy_set_header Host $doc_host;
-        proxy_pass http://localhost:80/$request_path;
+        proxy_set_header Connection "";
+        proxy_http_version 1.1;
+        proxy_pass http://backend/$request_path;
     }
 
     # ========================================
@@ -296,7 +307,9 @@ server {
         error_page 404 403 /$doc_version/404.html;
 
         proxy_set_header Host $doc_host;
-        proxy_pass http://localhost:80/$request_path;
+        proxy_set_header Connection "";
+        proxy_http_version 1.1;
+        proxy_pass http://backend/$request_path;
     }
 
     # ========================================
@@ -400,7 +413,9 @@ server {
         error_page 404 403 /$plugin_name/$plugin_version/404.html;
 
         proxy_set_header Host $plugin_host;
-        proxy_pass http://localhost:80/$request_path;
+        proxy_set_header Connection "";
+        proxy_http_version 1.1;
+        proxy_pass http://backend/$request_path;
     }
 
     # ========================================
@@ -423,6 +438,8 @@ server {
         error_page 404 403 /$doc_version.x/404.html;
 
         proxy_set_header Host $doc_host;
-        proxy_pass http://localhost:80/$request_path;
+        proxy_set_header Connection "";
+        proxy_http_version 1.1;
+        proxy_pass http://backend/$request_path;
     }
 }
