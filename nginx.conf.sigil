@@ -316,13 +316,6 @@ server {
         proxy_pass http://localhost:80/$request_path;
     }
 
-    # Ensure trailing slash for URLs without a filename/extension
-    location ~ ^(.+[^/])$ {
-        if ($uri !~ \.[^/]+$) {
-            return 301 $scheme://$host$uri/;
-        }
-    }
-
     # ========================================
     # Main version documentation (2.x - 5.x)
     # ========================================
