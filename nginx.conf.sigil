@@ -139,20 +139,32 @@ server {
     # Version root and language redirects
     # ========================================
 
+    # Redirect .next version without trailing slash to .next/
+    # /5.next → /5.next/
+    location ~ "^/([3-9]|[1-9][0-9]+)\.next$" {
+        return 301 /$1.next/;
+    }
+
     # Redirect .next version with language code to ensure trailing slash
-    location ~ "^/(6|5|4|3)\.next/([a-z]{2})$" {
+    location ~ "^/([3-9]|[1-9][0-9]+)\.next/([a-z]{2})$" {
         return 301 /$1.next/$2/;
+    }
+
+    # Redirect version.x without trailing slash to version.x/
+    # /5.x → /5.x/
+    location ~ "^/([2-9]|[1-9][0-9]+)\.x$" {
+        return 301 /$1.x/;
     }
 
     # Redirect bare version numbers to version.x format with English
     # /5 → /5.x/en/
-    location ~ ^/([2-6])/?$ {
+    location ~ ^/([2-9]|[1-9][0-9]+)/?$ {
         return 301 /$1.x/en/;
     }
 
     # Redirect version with language code to .x format
     # /5/en → /5.x/en/, /5/ja → /5.x/ja/
-    location ~ "^/([2-6])/([a-z]{2})/?$" {
+    location ~ "^/([2-9]|[1-9][0-9]+)/([a-z]{2})/?$" {
         return 301 /$1.x/$2/;
     }
 
@@ -170,7 +182,7 @@ server {
 
     # Redirect long version numbers to short .x format
     # /5.0/something → /5.x/something
-    location ~ "^/(6|5|4|3|2)\.0/(.*)$" {
+    location ~ "^/([2-9]|[1-9][0-9]+)\.0/(.*)$" {
         return 301 /$1.x/$2;
     }
 
@@ -194,7 +206,7 @@ server {
     # Development/pre-release documentation (.next versions)
     # ========================================
 
-    location ~ "^/(6|5|4|3)\.next/(.*)" {
+    location ~ "^/([3-9]|[1-9][0-9]+)\.next/(.*)" {
         set $doc_version $1.next;
         set $request_path $2;
 
@@ -268,40 +280,55 @@ server {
     }
 
     # Plugin root redirects to latest version
-    location ~ ^/(authentication|authorization|bake|chronos|debugkit|elasticsearch|migrations|phinx|queue)/?$ {
+    location ~ ^/([a-z]+)/?$ {
         set $plugin_name $1;
+        # Validate plugin exists in map, otherwise 404
+        if ($plugin_latest = "") {
+            return 404;
+        }
         return 301 /$plugin_name/$plugin_latest/en/;
-    }
-    location ~ ^/elasticsearch/5/?(.*)$ {
-        proxy_set_header Host "elasticsearch-docs-5.cakephp.org";
-        proxy_pass http://localhost:80/$1;
     }
 
     # Plugin /latest redirects
-    location ~ ^/(authentication|authorization|bake|chronos|debugkit|elasticsearch|migrations|phinx|queue)/latest/?$ {
+    location ~ ^/([a-z]+)/latest/?$ {
         set $plugin_name $1;
+        # Validate plugin exists in map, otherwise 404
+        if ($plugin_latest = "") {
+            return 404;
+        }
         return 301 /$plugin_name/$plugin_latest/en/;
     }
-    location ~ ^/migrations/5/?(.*)$ {
-        proxy_set_header Host "migrations-docs-5.cakephp.org";
-        proxy_pass http://localhost:80/$1;
-    }
 
-    location ~ ^/(authentication|authorization|bake|chronos|debugkit|elasticsearch|migrations|phinx|queue)/latest/(.*)$ {
+    location ~ ^/([a-z]+)/latest/(.*)$ {
         set $plugin_name $1;
+        # Validate plugin exists in map, otherwise 404
+        if ($plugin_latest = "") {
+            return 404;
+        }
         return 301 /$plugin_name/$plugin_latest/$2;
     }
 
     # Plugin version root redirects (version → version/en/)
-    location ~ ^/(authentication|authorization|bake|chronos|debugkit|elasticsearch|migrations|phinx|queue)/([0-9]+)/?$ {
-        return 301 /$1/$2/en/;
+    location ~ ^/([a-z]+)/([0-9]+)/?$ {
+        set $plugin_name $1;
+        set $plugin_version $2;
+        # Validate plugin-version combo exists in map, otherwise 404
+        if ($plugin_host = "") {
+            return 404;
+        }
+        return 301 /$plugin_name/$plugin_version/en/;
     }
 
     # Plugin proxy pass (unified for all plugins using maps)
-    location ~ ^/(authentication|authorization|bake|chronos|debugkit|elasticsearch|migrations|phinx|queue)/([0-9]+)/?(.*)$ {
+    location ~ ^/([a-z]+)/([0-9]+)/?(.*)$ {
         set $plugin_name $1;
         set $plugin_version $2;
         set $request_path $3;
+
+        # Validate plugin-version combo exists in map, otherwise 404
+        if ($plugin_host = "") {
+            return 404;
+        }
 
         # Cache static assets
         if ($request_path ~* ^(public|fonts|assets)/) {
