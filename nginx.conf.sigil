@@ -111,6 +111,12 @@ server {
 
     include {{ $.DOKKU_ROOT }}/{{ $.APP }}/nginx.conf.d/*.conf;
 
+    # ========================================
+    # CONFIGURATION
+    # ========================================
+    # Current stable version (update this when releasing new major version)
+    set $current_version "5";
+
     location ~ /\.ht {
         deny all;
     }
@@ -124,15 +130,20 @@ server {
 
     # Redirect root to current version
     location ~ ^/$ {
-        rewrite ^ /5.x/ permanent;
+        rewrite ^ /$current_version.x/ permanent;
     }
 
     # Redirect /latest to current version
     location ~ ^/latest/?$ {
-        return 301 /5.x/;
+        return 301 /$current_version.x/;
     }
     location ~ ^/latest/(.+)$ {
-        return 301 /5.x/$1;
+        return 301 /$current_version.x/$1;
+    }
+
+    # Proxy sitemap.xml to current version
+    location = /sitemap.xml {
+        rewrite ^ /$current_version.x/sitemap.xml last;
     }
 
     # ========================================
