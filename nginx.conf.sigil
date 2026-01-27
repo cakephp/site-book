@@ -84,6 +84,14 @@ map "$plugin_name-$plugin_version" $plugin_host {
     "queue-2"                   "queue-docs-2.cakephp.org";
 }
 
+# Rate limiting zones
+# Limit based on Cloudflare connecting IP (real client IP)
+limit_req_zone $http_cf_connecting_ip zone=perip:10m rate=30r/s;
+# Fallback to remote_addr if not from Cloudflare
+limit_req_zone $binary_remote_addr zone=perip_fallback:10m rate=20r/s;
+# Global rate limit to protect backend from total request flood
+limit_req_zone $server_name zone=global:10m rate=500r/s;
+
 server {
   listen      [::]:80;
   listen      80;
@@ -110,6 +118,16 @@ server {
     ssl_protocols             TLSv1.2 TLSv1.3;
 
     include {{ $.DOKKU_ROOT }}/{{ $.APP }}/nginx.conf.d/*.conf;
+
+    # ========================================
+    # RATE LIMITING
+    # ========================================
+    # Per-IP: 30 req/s with burst of 50 (allows page with 50 assets to load instantly)
+    limit_req zone=perip burst=50 nodelay;
+    # Global: 500 req/s protects against total flood
+    limit_req zone=global burst=100 nodelay;
+    # Return 429 instead of 503 for rate limit errors
+    limit_req_status 429;
 
     # ========================================
     # CONFIGURATION
