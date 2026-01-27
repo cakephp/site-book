@@ -12,7 +12,6 @@ map $doc_version $doc_host {
     # Development/pre-release versions
     "6.next" "newbook-6next.cakephp.org";
     "5.next" "newbook-5next.cakephp.org";
-    "4.next" "newbook-4next.cakephp.org";
     "3.next" "newbook-3next.cakephp.org";
 
     # Legacy versions
@@ -270,9 +269,19 @@ server {
     # Development/pre-release documentation (.next versions)
     # ========================================
 
+    # Redirect non-existent .next versions to homepage
+    location ~ "^/4\.next/(.*)$" {
+        return 301 /$current_version.x/;
+    }
+
     location ~ "^/([3-9]|[1-9][0-9]+)\.next/(.*)" {
         set $doc_version $1.next;
         set $request_path $2;
+
+        # Validate backend exists in map, otherwise 404
+        if ($doc_host = "") {
+            return 404;
+        }
 
         # Cache static assets
         if ($request_path ~* ^(public|fonts|assets)/) {
@@ -296,6 +305,11 @@ server {
     location ~ "^/(1\.[123])/(.*)" {
         set $doc_version $1;
         set $request_path $2;
+
+        # Validate backend exists in map, otherwise 404
+        if ($doc_host = "") {
+            return 404;
+        }
 
         # Cache static assets
         if ($request_path ~* ^(public|fonts|assets)/) {
@@ -426,6 +440,11 @@ server {
     location ~ "^/([2-9]|[1-9][0-9]+)\.x/(.*)" {
         set $doc_version $1;
         set $request_path $2;
+
+        # Validate backend exists in map, otherwise 404
+        if ($doc_host = "") {
+            return 404;
+        }
 
         # Cache static assets
         if ($request_path ~* ^(public|fonts|assets)/) {
