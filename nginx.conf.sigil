@@ -330,6 +330,11 @@ server {
         return 301 /$plugin_name/$plugin_version/en/;
     }
 
+    # Plugin version with language code missing trailing slash
+    location ~ "^/([a-z]+)/([0-9]+)/([a-z]{2})$" {
+        return 301 /$1/$2/$3/;
+    }
+
     # Plugin proxy pass (unified for all plugins using maps)
     location ~ ^/([a-z]+)/([0-9]+)/?(.*)$ {
         set $plugin_name $1;
