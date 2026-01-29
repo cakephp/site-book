@@ -78,6 +78,32 @@ map "$plugin_name-$plugin_version" $plugin_host {
     "queue-2"                   "queue-docs-2.cakephp.org";
 }
 
+# ========================================
+# Page-level redirects (moved/deleted pages)
+# ========================================
+# Automatically redirects to current version ($current_version)
+# Pattern format: Match any version, redirect to current
+# Example: /4.x/old-page.html -> extracts path -> redirects to /5.x/new-page.html
+
+map $request_uri $redirect_path {
+    default "";
+
+    # Folder structure page merged into conventions - 5.x and up only
+    #"~^/([5-9]|[1-9][0-9]+)\.x/intro/cakephp-folder-structure\.html$"  "intro/conventions.html";
+
+    # Console and Shells renamed to Console Commands (PR #8194) - 4.x and up only
+    "~^/([4-9]|[1-9][0-9]+)\.x/console-and-shells\.html$"              "console-commands/";
+
+    # Cookie component removed, functionality moved to Request/Response (PR #8194) - 4.x and up only
+    "~^/([4-9]|[1-9][0-9]+)\.x/controllers/components/cookie\.html$"   "controllers/request-response.html#setting-cookies";
+
+    # Add more redirects here as needed
+    # "~^/[0-9]+\.x/old-path\.html$"  "new-path.html";
+
+    # Page completely removed (use 410 Gone)
+    # "~^/[0-9]+\.x/removed-feature\.html$"  "GONE";
+}
+
 # Upstream for Dokku's nginx with keepalive connection pooling
 # max_fails=0 prevents marking upstream as "down" during brief unavailability
 upstream backend {
@@ -453,6 +479,16 @@ Sitemap: https://book.cakephp.org/sitemap.xml
     location ~ "^/([2-9]|[1-9][0-9]+)\.x/(.*)" {
         set $doc_version $1;
         set $request_path $2;
+
+        # Check for page-level redirects (moved/deleted pages)
+        if ($redirect_path != "") {
+            return 301 /$current_version.x/$redirect_path;
+        }
+
+        # If path is marked as GONE (410)
+        if ($redirect_path = "GONE") {
+            return 410;
+        }
 
         # Validate backend exists in map, otherwise 404
         if ($doc_host = "") {

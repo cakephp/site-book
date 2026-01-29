@@ -33,7 +33,9 @@ echo "🐳 Testing nginx config with Docker..."
 echo ""
 
 # Test the config using nginx in Docker
-if docker run --rm -v "$TEST_CONFIG:/etc/nginx/conf.d/default.conf" nginx:alpine nginx -t 2>&1 | grep -q "syntax is ok"; then
+if docker run --rm \
+    -v "$TEST_CONFIG:/etc/nginx/conf.d/default.conf" \
+    nginx:alpine nginx -t 2>&1 | grep -q "syntax is ok"; then
     echo ""
     echo "✅ Nginx configuration is valid!"
     echo ""
