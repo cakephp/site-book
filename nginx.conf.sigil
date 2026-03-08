@@ -18,7 +18,7 @@ map $doc_version $doc_host {
 # Plugin latest version map
 map $plugin_name $plugin_latest {
     default                 "";
-    "authentication"        "3";
+    "authentication"        "4";
     "authorization"         "3";
     "bake"                  "3";
     "chronos"               "3";
@@ -37,6 +37,7 @@ map "$plugin_name-$plugin_version" $plugin_host {
     "authentication-1"          "authentication-docs.cakephp.org";
     "authentication-2"          "authentication-docs-2.cakephp.org";
     "authentication-3"          "authentication-docs-3.cakephp.org";
+    "authentication-4"          "authentication-docs-4.cakephp.org";
 
     # Authorization
     "authorization-1"           "authorization-docs.cakephp.org";
