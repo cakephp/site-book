@@ -381,9 +381,9 @@ Sitemap: https://book.cakephp.org/sitemap.xml
         rewrite ^/authorization/2\.[x0]/?(.*) /authorization/2/$1 redirect;
     }
 
-    location ~ "^/(bake|chronos)/([12])\.x/?(.*)"
+    location ~ "^/(bake|chronos)/([123])\.x/?(.*)"
     {
-        rewrite ^/(bake|chronos)/([12])\.x/?(.*) /$1/$2/$3 redirect;
+        rewrite ^/(bake|chronos)/([123])\.x/?(.*) /$1/$2/$3 redirect;
     }
 
     location ~ "^/debugkit/([34])\.x/?(.*)"
