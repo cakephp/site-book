@@ -79,6 +79,12 @@ map "$plugin_name-$plugin_version" $plugin_host {
     "queue-2"                   "queue-docs-2.cakephp.org";
 }
 
+# A map of all the already converted plugin specific vitepress docs - which do NOT need the /en/ at the end by default
+map "$plugin_name-$plugin_version" $plugin_root_redirect {
+    default                     "/$plugin_name/$plugin_version/en/";
+    "chronos-3"                 "/chronos/3/";
+}
+
 # ========================================
 # Page-level redirects (moved/deleted pages)
 # ========================================
@@ -404,21 +410,23 @@ Sitemap: https://book.cakephp.org/sitemap.xml
     # Plugin root redirects to latest version
     location ~ ^/([a-z]+)/?$ {
         set $plugin_name $1;
+        set $plugin_version $plugin_latest;
         # Validate plugin exists in map, otherwise 404
         if ($plugin_latest = "") {
             return 404;
         }
-        return 301 /$plugin_name/$plugin_latest/en/;
+        return 301 $plugin_root_redirect;
     }
 
     # Plugin /latest redirects
     location ~ ^/([a-z]+)/latest/?$ {
         set $plugin_name $1;
+        set $plugin_version $plugin_latest;
         # Validate plugin exists in map, otherwise 404
         if ($plugin_latest = "") {
             return 404;
         }
-        return 301 /$plugin_name/$plugin_latest/en/;
+        return 301 $plugin_root_redirect;
     }
 
     location ~ ^/([a-z]+)/latest/(.*)$ {
@@ -430,7 +438,7 @@ Sitemap: https://book.cakephp.org/sitemap.xml
         return 301 /$plugin_name/$plugin_latest/$2;
     }
 
-    # Plugin version root redirects (version → version/en/)
+    # Plugin version root redirects
     location ~ ^/([a-z]+)/([0-9]+)/?$ {
         set $plugin_name $1;
         set $plugin_version $2;
@@ -438,7 +446,7 @@ Sitemap: https://book.cakephp.org/sitemap.xml
         if ($plugin_host = "") {
             return 404;
         }
-        return 301 /$plugin_name/$plugin_version/en/;
+        return 301 $plugin_root_redirect;
     }
 
     # Plugin version with language code missing trailing slash
