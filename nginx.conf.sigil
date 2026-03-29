@@ -93,11 +93,12 @@ map "$plugin_name-$plugin_version" $plugin_version_root_redirect {
     "migrations-5"              "/migrations/5/";
 }
 
-# Plugin version root request path mapping
-map "$plugin_name-$plugin_version" $plugin_root_request_path {
-    default                     "en/";
-    "chronos-3"                 "";
-    "migrations-5"              "";
+# Plugin version root proxy mode
+# This is the opt-in config for already converted vitepress configs which don't have /en anymore
+map "$plugin_name-$plugin_version" $plugin_root_proxy {
+    default                     "0";
+    "chronos-3"                 "1";
+    "migrations-5"              "1";
 }
 
 # ========================================
@@ -466,11 +467,15 @@ Sitemap: https://book.cakephp.org/sitemap.xml
     location ~ ^/([a-z]+)/([0-9]+)/$ {
         set $plugin_name $1;
         set $plugin_version $2;
-        set $request_path $plugin_root_request_path;
+        set $request_path "";
 
         # Validate plugin-version combo exists in map, otherwise 404
         if ($plugin_host = "") {
             return 404;
+        }
+
+        if ($plugin_root_proxy = "0") {
+            return 301 /$plugin_name/$plugin_version/en/;
         }
 
         proxy_intercept_errors on;
