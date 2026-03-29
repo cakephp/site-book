@@ -83,6 +83,21 @@ map "$plugin_name-$plugin_version" $plugin_host {
 map $plugin_name $plugin_latest_root_redirect {
     default                     "/$plugin_name/$plugin_latest/en/";
     "chronos"                   "/chronos/3/";
+    "migrations"                "/migrations/5/";
+}
+
+# Plugin version root redirect mapping
+map "$plugin_name-$plugin_version" $plugin_version_root_redirect {
+    default                     "/$plugin_name/$plugin_version/en/";
+    "chronos-3"                 "/chronos/3/";
+    "migrations-5"              "/migrations/5/";
+}
+
+# Plugin version root request path mapping
+map "$plugin_name-$plugin_version" $plugin_root_request_path {
+    default                     "en/";
+    "chronos-3"                 "";
+    "migrations-5"              "";
 }
 
 # ========================================
@@ -436,14 +451,27 @@ Sitemap: https://book.cakephp.org/sitemap.xml
         return 301 /$plugin_name/$plugin_latest/$2;
     }
 
-    location = /chronos/3 {
-        return 301 /chronos/3/;
+    # Plugin version root redirects
+    location ~ ^/([a-z]+)/([0-9]+)$ {
+        set $plugin_name $1;
+        set $plugin_version $2;
+        # Validate plugin-version combo exists in map, otherwise 404
+        if ($plugin_host = "") {
+            return 404;
+        }
+        return 301 $plugin_version_root_redirect;
     }
 
-    location = /chronos/3/ {
-        set $plugin_name chronos;
-        set $plugin_version 3;
-        set $request_path "";
+    # Plugin version root requests
+    location ~ ^/([a-z]+)/([0-9]+)/$ {
+        set $plugin_name $1;
+        set $plugin_version $2;
+        set $request_path $plugin_root_request_path;
+
+        # Validate plugin-version combo exists in map, otherwise 404
+        if ($plugin_host = "") {
+            return 404;
+        }
 
         proxy_intercept_errors on;
         error_page 404 403 /$plugin_name/$plugin_version/404.html;
@@ -452,17 +480,6 @@ Sitemap: https://book.cakephp.org/sitemap.xml
         proxy_set_header Connection "";
         proxy_http_version 1.1;
         proxy_pass http://backend/$request_path;
-    }
-
-    # Plugin version root redirects
-    location ~ ^/([a-z]+)/([0-9]+)/?$ {
-        set $plugin_name $1;
-        set $plugin_version $2;
-        # Validate plugin-version combo exists in map, otherwise 404
-        if ($plugin_host = "") {
-            return 404;
-        }
-        return 301 /$plugin_name/$plugin_version/en/;
     }
 
     # Plugin version with language code missing trailing slash
