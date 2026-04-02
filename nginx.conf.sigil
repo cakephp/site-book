@@ -201,6 +201,17 @@ server {
     gzip on;
     gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
 
+    # Proxy favicon requests to current version's site
+    location ~ ^/favicon {
+        set $doc_version $current_version;
+        proxy_set_header Host $doc_host;
+        proxy_set_header Connection "";
+        proxy_http_version 1.1;
+        proxy_pass http://backend$request_uri;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
     # Redirect root to current version
     location ~ ^/$ {
         rewrite ^ /$current_version.x/ permanent;
