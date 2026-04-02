@@ -82,6 +82,7 @@ map "$plugin_name-$plugin_version" $plugin_host {
 # Plugin latest root redirect mapping
 map $plugin_name $plugin_latest_root_redirect {
     default                     "/$plugin_name/$plugin_latest/en/";
+    "authentication"            "/authentication/4/";
     "chronos"                   "/chronos/3/";
     "migrations"                "/migrations/5/";
 }
@@ -89,6 +90,7 @@ map $plugin_name $plugin_latest_root_redirect {
 # Plugin version root redirect mapping
 map "$plugin_name-$plugin_version" $plugin_version_root_redirect {
     default                     "/$plugin_name/$plugin_version/en/";
+    "authentication-4"          "/authentication/4/";
     "chronos-3"                 "/chronos/3/";
     "migrations-5"              "/migrations/5/";
 }
@@ -97,6 +99,7 @@ map "$plugin_name-$plugin_version" $plugin_version_root_redirect {
 # This is the opt-in config for already converted vitepress configs which don't have /en anymore
 map "$plugin_name-$plugin_version" $plugin_root_proxy {
     default                     "0";
+    "authentication-4"          "1";
     "chronos-3"                 "1";
     "migrations-5"              "1";
 }
