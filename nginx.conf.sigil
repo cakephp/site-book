@@ -85,6 +85,7 @@ map $plugin_name $plugin_latest_root_redirect {
     "authentication"            "/authentication/4/";
     "chronos"                   "/chronos/3/";
     "migrations"                "/migrations/5/";
+    "debugkit"                  "/debugkit/5/";
 }
 
 # Plugin version root redirect mapping
@@ -93,6 +94,7 @@ map "$plugin_name-$plugin_version" $plugin_version_root_redirect {
     "authentication-4"          "/authentication/4/";
     "chronos-3"                 "/chronos/3/";
     "migrations-5"              "/migrations/5/";
+    "debugkit-5"                "/debugkit/5/";
 }
 
 # Plugin version root proxy mode
@@ -102,6 +104,7 @@ map "$plugin_name-$plugin_version" $plugin_root_proxy {
     "authentication-4"          "1";
     "chronos-3"                 "1";
     "migrations-5"              "1";
+    "debugkit-5"                "1";
 }
 
 # ========================================
