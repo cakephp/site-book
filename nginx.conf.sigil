@@ -83,6 +83,7 @@ map "$plugin_name-$plugin_version" $plugin_host {
 map $plugin_name $plugin_latest_root_redirect {
     default                     "/$plugin_name/$plugin_latest/en/";
     "authentication"            "/authentication/4/";
+    "authorization"             "/authorization/3/";
     "bake"                      "/bake/3/";
     "chronos"                   "/chronos/3/";
     "migrations"                "/migrations/5/";
@@ -93,6 +94,7 @@ map $plugin_name $plugin_latest_root_redirect {
 map "$plugin_name-$plugin_version" $plugin_version_root_redirect {
     default                     "/$plugin_name/$plugin_version/en/";
     "authentication-4"          "/authentication/4/";
+    "authorization-3"           "/authorization/4/";
     "bake-3"                    "/bake/3/";
     "chronos-3"                 "/chronos/3/";
     "migrations-5"              "/migrations/5/";
@@ -104,6 +106,7 @@ map "$plugin_name-$plugin_version" $plugin_version_root_redirect {
 map "$plugin_name-$plugin_version" $plugin_root_proxy {
     default                     "0";
     "authentication-4"          "1";
+    "authorization-3"           "1";
     "bake-3"                    "1";
     "chronos-3"                 "1";
     "migrations-5"              "1";
