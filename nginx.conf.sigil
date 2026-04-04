@@ -89,6 +89,7 @@ map $plugin_name $plugin_latest_root_redirect {
     "migrations"                "/migrations/5/";
     "debugkit"                  "/debugkit/5/";
     "queue"                     "/queue/2/";
+    "elasticsearch"             "/elasticsearch/5/";
 }
 
 # Plugin version root redirect mapping
@@ -101,6 +102,7 @@ map "$plugin_name-$plugin_version" $plugin_version_root_redirect {
     "migrations-5"              "/migrations/5/";
     "debugkit-5"                "/debugkit/5/";
     "queue-2"                   "/queue/2/";
+    "elasticsearch-5"           "/elasticsearch/5/";
 }
 
 # Plugin version root proxy mode
@@ -114,6 +116,7 @@ map "$plugin_name-$plugin_version" $plugin_root_proxy {
     "migrations-5"              "1";
     "debugkit-5"                "1";
     "queue-2"                   "1";
+    "elasticsearch-5"           "1";
 }
 
 # ========================================
